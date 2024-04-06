@@ -6,19 +6,18 @@ require_once "functions.php";
 $name = sanitize_input($_POST['name']);
 $email = sanitize_input($_POST['email']);
 $password = sanitize_input($_POST['password']);
-$role = 'common';
 
 if (!user_exists($name)) {
-    $sql = "INSERT INTO users (name, email, password, role) VALUES (?,?,?,?)";
+    $hash = password_hash($password, PASSWORD_DEFAULT);
+    $sql = "INSERT INTO users (name, email, password) VALUES (?,?,?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssss", $name, $email, $password, $role);
+    $stmt->bind_param("sss", $name, $email, $hash);
     $stmt->execute();
     $user_id = $conn->insert_id;
     $_SESSION['user'] = array(
         'id' => $user_id,
         'name' => $name,
-        'email' => $email,
-        'role' => $role
+        'email' => $email
     );
     header("location: dashboard.php");
 } else {
